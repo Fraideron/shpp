@@ -1,10 +1,7 @@
 #include <iostream>
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "console.h"
 #include "gwindow.h" // for GWindow
-#include "simpio.h"  // for getLine
-#include "vector.h"  // for Vector
 using namespace std;
 
 
