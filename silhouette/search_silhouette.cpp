@@ -6,9 +6,14 @@
 #include "gbufferedimage.h"
 using namespace std;
 
-//This func change pixels array to vector<vector<pair<bool, bool>>>
-// pair: first param = color (0 = white, 1 = black)
-//       second para = check (0 = not yet check, 1 = already check)
+/*This func change pixels array to vector<vector<pair<bool, bool>>>
+* pair: first param = color (0 = white, 1 = black)
+*       second para = check (0 = not yet check, 1 = already check)
+*
+*@param img - a picture
+*@pixels - main storage, for search
+*
+*/
 void getColorMass(GBufferedImage & img, vector<vector<pair<bool, bool>>> & pixels){
     for (int y = 0; y < img.getHeight(); ++y) {
         vector<pair<bool,bool>> pixelsForWidth;
@@ -28,6 +33,18 @@ void getColorMass(GBufferedImage & img, vector<vector<pair<bool, bool>>> & pixel
 //simulate search in depth(hlubuny)
 //if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
 //Find all black spots.
+
+
+
+/*This func simulate search in depth(hlubuny)
+*if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
+*Find all black spots.
+*
+* @param table - main storage of picture
+*
+* @return countSiluets - count of siluets
+*
+*/
 int searchSiluets(vector<vector<pair<bool,bool>>> & table){
     int countSiluets = 0;
     int X_Lim = table.size();
@@ -108,4 +125,3 @@ int main() {
 
     return 0;
 }
-
