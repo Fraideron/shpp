@@ -30,13 +30,10 @@ void getColorMass(GBufferedImage & img, vector<vector<pair<bool, bool>>> & pixel
     }
 }
 
-//simulate search in depth(hlubuny)
-//if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
-//Find all black spots.
 
 
-
-/*This func simulate search in depth(hlubuny)
+/*
+This function simulates wide search
 *if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
 *Find all black spots.
 *
