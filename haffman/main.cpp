@@ -5,7 +5,10 @@
 #include <fstream>
 #include <iterator>
 
+
 using namespace std;
+
+
 
 vector<bool> code;
 map<char,vector<bool> > table;
@@ -48,6 +51,8 @@ struct MyCompare
  * @param inputData - all input chars
  * @return Node* root of tree
  */
+
+
 Node* buildTreeForHuffman(vector<char> *inputData){
     map<char, int> chastotu;
      for (int i = 0; i < inputData->size(); ++i) {
@@ -68,23 +73,27 @@ Node* buildTreeForHuffman(vector<char> *inputData){
      }
 
 
-    while (tempListForTree.size()!=1){
-        tempListForTree.sort(MyCompare());
+     while (tempListForTree.size()!=1){
+         tempListForTree.sort(MyCompare());
 
-        Node *SonL = tempListForTree.front();
-        tempListForTree.pop_front();
+         Node *SonL = tempListForTree.front();
+         tempListForTree.pop_front();
 
-        Node *SonR = tempListForTree.front();
-        tempListForTree.pop_front();
+         Node *SonR = tempListForTree.front();
+         tempListForTree.pop_front();
 
-        Node *parent = new Node(SonL,SonR);
-        tempListForTree.push_back(parent);
-    }
-    
-    Node *root = tempListForTree.front();
-     
+         Node *parent = new Node(SonL,SonR);
+         tempListForTree.push_back(parent);
+     }
+
+
+     Node *root = tempListForTree.front();
+
+
     return root;
+
 }
+
 
 /*
 * This function make code for symbol.
@@ -96,21 +105,23 @@ Node* buildTreeForHuffman(vector<char> *inputData){
 * @param root - root of the tree
 */
 void BuildTable(Node *root){
-  if (root->left!=NULL){
-      code.push_back(0);
-      BuildTable(root->left);
-  }
-
-  if (root->right!=NULL){
-      code.push_back(1);
-      BuildTable(root->right);
+    if (root->left!=NULL){
+        //cout<<"0"<< endl;
+        code.push_back(0);
+        BuildTable(root->left);
     }
 
-  if (root->c){
-    table[root->c]=code;
-  }
+    if (root->right!=NULL){
+        //cout<<"1"<< endl;
+        code.push_back(1);
+        BuildTable(root->right);
+    }
 
-  code.pop_back();
+    if (root->c){
+      table[root->c]=code;
+    }
+
+    code.pop_back();
 }
 
 
@@ -237,7 +248,13 @@ int main()
     codeFile(table, codeForFile);
 
     map<vector<bool>, char>* mainMapForDecode = new map<vector<bool>, char>();
-    decodeFile(mainMapForDecode);
+    vector<bool>* vectForDecodeFile = new vector<bool>();
+    vectForDecodeFile = decodeFile(mainMapForDecode);
+    makeDecodedFile(vectForDecodeFile, mainMapForDecode);
+
+    delete mainMapForDecode;
+    delete vectForDecodeFile;
+    delete inputData;
 
     return 0;
 }
