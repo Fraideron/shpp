@@ -132,8 +132,8 @@ void BuildTable(Node *root){
  * @param nameOfsourceFile
  * @return vector<char> - it contains all the characters read from the file
  */
-vector<char>* readFile(){
-    ifstream input("debug/img.jpg", ios::binary);
+vector<char>* readFile(string name){
+    ifstream input(name.c_str(), ios::binary);
     // copies all data into buffer
     char symb;
     vector<char> *rezult = new vector<char>();
@@ -158,9 +158,9 @@ vector<char>* readFile(){
  * @param codeForFile - vector of boolean values for codding file
  */
 
-void codeFile(map<char, vector<bool> > table,  vector<bool> & codeForFile ){
+void codeFile(string wayToCodedFile, map<char, vector<bool> > table,  vector<bool> & codeForFile ){
 
-    ofstream output("debug/codeFile", ios::binary);
+    ofstream output( wayToCodedFile.c_str(), ios::binary);
 
     int sizeOfMap = table.size();
     output.write((char*) &sizeOfMap, sizeof(int));
@@ -213,7 +213,7 @@ void codeFile(map<char, vector<bool> > table,  vector<bool> & codeForFile ){
  * @return vector with boolean values, this is the source code of coded file
  */
 
-void decodeFile(vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDecode);
+void decodeFile(string wayToCodedFile, vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDecode);
 
 
 /**
@@ -221,13 +221,21 @@ void decodeFile(vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDe
  * @param codeForFile - vector with boolean values, this is the source code of coded file
  * @param mainMapForDecode - map with equals codes and characters
  */
-void makeDecodedFile( vector<bool> * codeForFile, map<vector<bool>, char>* mainMapForDecode);
+void makeDecodedFile( string wayToOutputFile, vector<bool> * codeForFile, map<vector<bool>, char>* mainMapForDecode);
 
 
 int main()
 {
+    /**
+    * way to files
+    */
+
+    string wayToInputFile = "debug/img.jpg";
+    string wayToCodedFile = "debug/codedFile";
+    string wayToOutputFile = "debug/rezult.jpg";
+
    vector<char> *inputData = new vector<char>;
-   inputData = readFile();
+   inputData = readFile(wayToInputFile );
 
 
    BuildTable(buildTreeForHuffman(inputData));
@@ -241,13 +249,13 @@ int main()
         }
     }
 
-    codeFile(table, codeForFile);
+    codeFile(wayToCodedFile, table, codeForFile);
 
     map<vector<bool>, char>* mainMapForDecode = new map<vector<bool>, char>();
     vector<bool>* vectForDecodeFile = new vector<bool>();
 
-    decodeFile(vectForDecodeFile, mainMapForDecode);
-    makeDecodedFile(vectForDecodeFile, mainMapForDecode);
+    decodeFile(wayToCodedFile,vectForDecodeFile, mainMapForDecode);
+    makeDecodedFile(wayToOutputFile, vectForDecodeFile, mainMapForDecode);
 
     delete mainMapForDecode;
     delete vectForDecodeFile;
@@ -256,8 +264,8 @@ int main()
     return 0;
 }
 
-void decodeFile(vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDecode){
-    ifstream readFile("debug/codeFile", ios::binary);
+void decodeFile(string wayToCodedFile, vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDecode){
+    ifstream readFile(wayToCodedFile.c_str(), ios::binary);
 
     int sizeOfMainMap;
     readFile.read((char*) &sizeOfMainMap, sizeof(int));
@@ -295,8 +303,8 @@ void decodeFile(vector<bool>* codeForFile, map<vector<bool>, char>* mainMapForDe
     readFile.close();
 }
 
-void makeDecodedFile( vector<bool> * codeForFile, map<vector<bool>, char>* mainMapForDecode){
-    ofstream writeFile("debug/magic.jpg", ios::binary);
+void makeDecodedFile( string wayToOutputFile, vector<bool> * codeForFile, map<vector<bool>, char>* mainMapForDecode){
+    ofstream writeFile(wayToOutputFile.c_str(), ios::binary);
     vector<bool> key;
     vector<bool>::iterator iter = codeForFile->begin();
     while(iter != codeForFile->end()) {
