@@ -106,13 +106,11 @@ Node* buildTreeForHuffman(vector<char> *inputData){
 */
 void BuildTable(Node *root){
     if (root->left!=NULL){
-        //cout<<"0"<< endl;
         code.push_back(0);
         BuildTable(root->left);
     }
 
     if (root->right!=NULL){
-        //cout<<"1"<< endl;
         code.push_back(1);
         BuildTable(root->right);
     }
