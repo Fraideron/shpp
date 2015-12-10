@@ -226,7 +226,6 @@ void makeDecodedFile( vector<bool> * codeForFile, map<vector<bool>, char>* mainM
 
 int main()
 {
-
    vector<char> *inputData = new vector<char>;
    inputData = readFile();
 
