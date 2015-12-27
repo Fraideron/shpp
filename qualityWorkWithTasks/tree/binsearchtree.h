@@ -131,9 +131,9 @@ private:
     };
 
 
-
+    Node *root;
 public:
-     Node *root;
+    
     BinSearchTree() {
         root = 0;
     }
