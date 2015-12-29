@@ -19,12 +19,22 @@ public:
         img->load(file);
     }
 
+    /**
+     * @brief getColorRatio
+     * @param color
+     * @return
+     */
     bool getColorRatio(int color) {
         if(img->getRed(color) > 120 || img->getGreen(color) > 120 || img->getBlue(color) > 120 )
             return false;
         return true;
     }
 
+
+    /*This func change pixels array to vector<vector<pair<bool, bool>>>
+    * pair: first param = color (0 = white, 1 = black)
+    *       second para = check (0 = not yet check, 1 = already check)
+    */
     void generageBinPixels() {
         for (int y = 0; y < img->getHeight(); ++y) {
             vector<pair<bool,bool>> pixelsForWidth;
@@ -38,6 +48,16 @@ public:
         }
     }
 
+
+    /*
+    *This function simulates wide search
+    *if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
+    *Find all black spots.
+    *
+    *
+    * @return countSiluets - count of silhouettes
+    *
+    */
     int searchSilhouettes(){
 
         if (pixels.size() == 0) return 0;
@@ -78,13 +98,20 @@ public:
         return nunberOfSilhouettes;
     }
 
+    /**
+     * @brief checkPixel  - check if not out of range,
+     *                      the pixel is black
+     *                      and the pixel is not checked
+     * @param x   / pixel's position
+     * @param y  /
+     * @param tempPoints - deque for storage untested pixels
+     */
     void checkPixel(int x, int y,  deque<pair<int,int>> & tempPoints){
         if (x < pixels.size()) {
             if (!((pixels.at(x)).at(y)).second)
                 if (((pixels.at(x)).at(y)).first)
                     tempPoints.push_back(make_pair(x,y));
         }
-
     }
 
     ~ShilhouetteRecognizer() {
