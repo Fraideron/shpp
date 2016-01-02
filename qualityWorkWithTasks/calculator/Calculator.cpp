@@ -1,7 +1,8 @@
 #include <iostream>
+#include <sstream>
 #include "console.h"
-#include "simpio.h"  // for getLine
-#include "vector.h"  // for Vector
+#include "simpio.h"
+#include "vector.h"
 #include "stack.h"
 #include <math.h>
 
@@ -16,28 +17,30 @@ class Calculator
 private:
     string inputString ;
     Stack<string> * tempStack ;
-    vector<string> * polishNotation;
+    VEC::vector<string> * polishNotation;
 public:
     Calculator(string function) {
         inputString = function;
         tempStack = new Stack<string>;
-        polishNotation = new vector<string>;
+        polishNotation = new VEC::vector<string>;
     }
-    
+
     ~Calculator() {
         delete tempStack;
         delete polishNotation;
     }
-    
-    
-    
+
+
+
+
+
     /**
      * @brief getTokenType - function returns the value of int to separate tokens
      * @param token
      * @return type of token
      */
     int getTokenType(char token){
-        if(isdigit(token)){
+        if(isdigit(token) || token == '.' || token == ','){
             return 0;
         } else if(token == '+' || token == '-' || token == '*' || token == '/' || token == '^'){
             return 1;
@@ -48,7 +51,8 @@ public:
         }
         return -1;
     }
-    
+
+
     /**
      * @brief getOneTokenFromInputString - function returns a token starting with position 'i'
      * @param position - position of token start
@@ -57,22 +61,23 @@ public:
      */
     string getOneTokenFromInputString(int& position, string & functionString){
         string outputString;
-        
+
         char current = functionString[position];
         char next = functionString[position+1];
-        
+
         while ((getTokenType(current) == getTokenType(next)) && position < functionString.size()) {
+
             outputString += current;
             position++;
             current = next;
             next = functionString[position+1];
         }
-        
+
         outputString += current;
         ++position;
         return outputString;
     }
-    
+
     /**
      * @brief getTokenPriority - priority function returns each input token
      * @param token - token to check
@@ -91,9 +96,9 @@ public:
             return 3;
         }
     }
-    
-    
-    
+
+
+
     /**
      * @brief getPolishNotationFromString - using a standard algorithm,
      *                                      we obtain the inverse Polish notation
@@ -102,8 +107,8 @@ public:
     void getPolishNotationFromString(){
         for (int i = 0; i < inputString.size(); ) {
             string token = getOneTokenFromInputString(i, inputString);
-            int tokenType = getTokenPriority(token[0]);
-            
+            int tokenPriority = getTokenPriority(token[0]);
+
             if(isdigit(token[0]))  {
                 polishNotation->push_back(token);
             } else if (token == "(") {
@@ -114,25 +119,25 @@ public:
                     tempStack->pop();
                 }
                 tempStack->pop();
-            } else if((tokenType == 4) || (tokenType == 3) || (tokenType == 1) || (tokenType == 2) ){
+            } else if((tokenPriority == 4) || (tokenPriority == 3) || (tokenPriority == 1) || (tokenPriority == 2) ){
                 if(tempStack->empty()){
                     tempStack->push(token);
                     continue;
                 }
-                
-                while((!tempStack->empty()) && tokenType < getTokenPriority(tempStack->top()[0]) ){
+
+                while((!tempStack->empty()) && tokenPriority < getTokenPriority(tempStack->top()[0]) ){
                     polishNotation->push_back(tempStack->top());
                     tempStack->pop();
                 }
                 tempStack->push(token);
             }
         }
-        
+
         while (!tempStack->empty()) {
             polishNotation->push_back(tempStack->top());
             tempStack->pop();
         }
-        
+
     }
     /**
      * @brief stringToDouble convert  string to double
@@ -145,7 +150,7 @@ public:
         ss >> convertedValue;
         return convertedValue;
     }
-    
+
     /**
      * @brief doubleToString convert double to string
      * @param doub
@@ -156,7 +161,7 @@ public:
         strs << doub;
         string str = strs.str();
         return str;
-        
+
     }
     /**
      * @brief getFunctionParamNumber - function returns the number of operands
@@ -177,7 +182,7 @@ public:
             return 0;
         }
     }
-    
+
     /**
      * @brief calculateInputFunction - using inverse Polish notation,
      *                                 this function is operation calculates
@@ -186,51 +191,54 @@ public:
      *                                 deletes them and adds the result in the removal of seat
      */
     void calculateInputFunction(){
-        
-        
         for (int i = 0; i < polishNotation->size(); i++) {
             string token = polishNotation->at(i);
-            
-            
+
+
             if (getFunctionParamNumber(token) == 2) {
-                int firstArg = stringToDouble(polishNotation->at(i-1));
-                int secondArg = stringToDouble(polishNotation->at(i-2));
+                double firstArg = stringToDouble(polishNotation->at(i-1));
+                double secondArg = stringToDouble(polishNotation->at(i-2));
                 double rezult;
                 if (token == "+") {
                     rezult = firstArg + secondArg;
                 } else if(token == "-") {
-                    rezult = firstArg - secondArg;
+                    rezult = secondArg - firstArg;
                 } else if(token == "/"){
-                    rezult = firstArg / secondArg;
+                    rezult = secondArg / firstArg;
                 } else if(token == "*"){
                     rezult = firstArg * secondArg;
                 } else if (token == "^"){
-                    rezult = pow(firstArg, secondArg);
+                    rezult = pow(secondArg, firstArg);
                 }
-                
-                polishNotation->erase(polishNotation->begin()+i);
-                polishNotation->erase(polishNotation->begin()+i-2);
-                polishNotation->erase(polishNotation->begin()+i-2);
-                polishNotation->insert(polishNotation->begin()+i-2, doubleToString(rezult));
+
+                cout << endl << "diya: " << secondArg<< token << firstArg<< " = " << rezult;
+
+                polishNotation->erase(i);
+                polishNotation->erase(i-2);
+                polishNotation->erase(i-2);
+                polishNotation->insert(i-2, doubleToString(rezult));
                 i -= 2;
             } else if(getFunctionParamNumber(token) == 1){
-                int firstArg = stringToDouble(polishNotation->at(i-1));
+                double firstArg = stringToDouble(polishNotation->at(i-1));
                 double rezult;
                 if(token == "cos"){
                     rezult = cos(firstArg);
                 } else if(token == "sin"){
                     rezult = sin(firstArg);
                 }
-                polishNotation->erase(polishNotation->begin()+i);
-                polishNotation->erase(polishNotation->begin()+i-1);
-                polishNotation->insert(polishNotation->begin()+i-1, doubleToString(rezult));
+                polishNotation->erase(i);
+                polishNotation->erase(i-1);
+                polishNotation->insert(i-1, doubleToString(rezult));
                 i--;
+
+                cout << endl << "diya: " << token << firstArg<< " = " << rezult;
+
             }
-            
+
         }
-        cout << (*polishNotation)[0];
-        
+        cout << endl <<"Rezult: " << (*polishNotation)[0];
     }
+
 };
 
 void performCalculations(string formula){
@@ -241,19 +249,18 @@ void performCalculations(string formula){
 }
 
 
-int main() {
-    
-    string formula = getLine("You can use next tokens: cos(token), sin(token), token^ token, and other standart operations. \nEnter the data for calculating, please: ");
-    cout << formula <<  " = ";
-    performCalculations(formula);
-    string check = getLine("\nOne's more? (y/n)");
-    while(check == "y"){
-        formula = getLine("\nEnter the data for calculating, please: ");
-        cout << endl << formula <<  " = ";
+    int main() {
+
+        string formula = getLine("You can use next tokens: cos(token), sin(token), token^ token, and other standart operations. \nEnter the data for calculating, please: ");
+        cout << ""<< formula;
         performCalculations(formula);
         string check = getLine("\nOne's more? (y/n)");
+        while(check == "y"){
+            formula = getLine("\nEnter the data for calculating, please: ");
+            cout << endl << formula <<  " = ";
+            performCalculations(formula);
+            check = getLine("\nOne's more? (y/n)");
+        }
+
+        return 0;
     }
-    
-    
-    return 0;
-}
