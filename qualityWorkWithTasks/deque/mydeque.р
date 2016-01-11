@@ -51,7 +51,7 @@ public:
         topPiece = newPart;
         positionOfTopPart = 0;
     }
-    /**
+    /*
     * @brief allocateBottom -  add a new storage part to the bottom of mass
     */
     void allocateBottom() {
