@@ -104,7 +104,7 @@ private:
         return height(node->getRight()) - height(node->getLeft());
     }
 
-/* Корректировка высоты дерева */
+
     void fixHeight(Node<T> *node) {
         int hl = height(node->getLeft());
         int hr = height(node->getRight());
