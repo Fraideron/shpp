@@ -1,147 +1,262 @@
 #include <iostream>
-#include <vector>
-#include <utility>
-#include <deque>
-#include <fstream>
+#include <sstream>
+#include "console.h"
 #include "simpio.h"
-#include "filelib.h"
-#include "gbufferedimage.h"
+#include "vector.h"
+#include "stack.h"
+#include <math.h>
+
 using namespace std;
 
-
-class ShilhouetteRecognizer {
+/**
+ * @brief The Calculator class  using an
+ *        algorithm sorting station
+ */
+class Calculator
+{
 private:
-    GBufferedImage *img;
-    vector<vector<pair<bool, bool>>> pixels;
-
+    string inputString ;
+    Stack<string> * tempStack ;
+    VEC::vector<string> * polishNotation;
 public:
-    ShilhouetteRecognizer(string file): img(new GBufferedImage()) {
-        img->load(file);
+    Calculator() {
+        this->tempStack = new Stack<string>;
+        this->polishNotation = new VEC::vector<string>;
     }
-
+    
+    ~Calculator() {
+        delete tempStack;
+        delete polishNotation;
+        inputString = " ";
+    }
+    
+    
+    
+    
+    
     /**
-     * @brief getColorRatio
-     * @param color
+     * @brief getTokenType - function returns the value of int for separate tokens
+     * @param token
+     * @return type of token
+     */
+    int getTokenType(char token){
+        if(isdigit(token) || token == '.' || token == ','){
+            return 0;
+        } else if(token == '+' || token == '-' || token == '*' || token == '/' || token == '^'){
+            return 1;
+        } else if(isalpha(token)){
+            return 2;
+        } else if(token == '(' || token == ')'){
+            return 3;
+        }
+        return -1;
+    }
+    
+    
+    /**
+     * @brief getOneTokenFromInputString - function returns a token starting with position 'i'
+     * @param position - position of token start
+     * @param functionString - string  for calculation
+     * @return string value(token)
+     */
+    string getOneTokenFromInputString(int& position, string & functionString){
+        string outputString;
+        
+        char current = functionString[position];
+        char next = functionString[position+1];
+        
+        while ((getTokenType(current) == getTokenType(next)) && position < functionString.size()) {
+            outputString += current;
+            position++;
+            current = next;
+            next = functionString[position+1];
+        }
+        
+        outputString += current;
+        ++position;
+        return outputString;
+    }
+    
+    /**
+     * @brief getTokenPriority - priority function returns each input token
+     * @param token - token to check
+     * @return int value - priority
+     */
+    int getTokenPriority (char token){
+        if(token == '+' || token == '-' ){
+            return 1;
+        }else if(token == '*' || token == '/'){
+            return 2;
+        }else if(token == '^'){
+            return 3;
+        }else if(token == '(' || token == ')'){
+            return 0;
+        } else {
+            return 4;
+        }
+    }
+    
+    
+    
+    /**
+     * @brief getPolishNotationFromString - using a standard algorithm,
+     *                                      we obtain the inverse Polish notation
+     *                                      from the input line
+     */
+    void getPolishNotationFromString(string function){
+        inputString = function;
+        for (int i = 0; i < inputString.size(); ) {
+            string token = getOneTokenFromInputString(i, inputString);
+            int tokenPriority = getTokenPriority(token[0]);
+            
+            if(isdigit(token[0]))  {
+                polishNotation->push_back(token);
+            } else if (token == "(") {
+                tempStack->push(token);
+            } else if(token == ")"){
+                while((tempStack->top() != "(") && (!tempStack->empty())) {
+                    polishNotation->push_back(tempStack->top());
+                    tempStack->pop();
+                }
+                tempStack->pop();
+            } else if((tokenPriority == 4) || (tokenPriority == 3) || (tokenPriority == 1) || (tokenPriority == 2) ){
+                if(tempStack->empty()){
+                    tempStack->push(token);
+                    continue;
+                }
+                
+                while((!tempStack->empty()) && tokenPriority < getTokenPriority(tempStack->top()[0]) ){
+                    polishNotation->push_back(tempStack->top());
+                    tempStack->pop();
+                }
+                tempStack->push(token);
+            }
+        }
+        
+        while (!tempStack->empty()) {
+            polishNotation->push_back(tempStack->top());
+            tempStack->pop();
+        }
+        
+    }
+    /**
+     * @brief stringToDouble convert  string to double
+     * @param str - input data
      * @return
      */
-    bool getColorRatio(int color) {
-        if(img->getRed(color) > 120 || img->getGreen(color) > 120 || img->getBlue(color) > 120 )
-            return false;
-        return true;
+    double stringToDouble(string str){
+        stringstream ss(str);
+        double convertedValue = 0;
+        ss >> convertedValue;
+        return convertedValue;
     }
-
-
-    /*This func change pixels array to vector<vector<pair<bool, bool>>>
-    * pair: first param = color (0 = white, 1 = black)
-    *       second para = check (0 = not yet check, 1 = already check)
-    */
-    void generageBinPixels() {
-        for (int y = 0; y < img->getHeight(); ++y) {
-            vector<pair<bool,bool>> pixelsForWidth;
-            for (int x = 0; x < img->getWidth(); ++x) {
-                pixelsForWidth.push_back(make_pair(
-                    getColorRatio(img->getRGB(x,y)),
-                    false
-                ));
-            }
-            pixels.push_back(pixelsForWidth);
-        }
-    }
-
-
-    /*
-    *This function simulates wide search
-    *if the pixel's color is blak, simulate search in depth and search all black pixels in this spot.
-    *Find all black spots.
-    *
-    *
-    * @return countSiluets - count of silhouettes
-    *
-    */
-    int searchSilhouettes(){
-
-        if (pixels.size() == 0) return 0;
-
-        int nunberOfSilhouettes = 0;
-        int X_Lim = pixels.size();
-
-        for (int x = 0; x < X_Lim; ++x) {
-            int Y_Lim = pixels[x].size();
-
-            for (int y = 0; y < Y_Lim; ++y) {
-                if(!((pixels[x])[y]).second && ((pixels[x])[y]).first){
-                    nunberOfSilhouettes++;
-                    deque<pair<int,int>> tempPoints;
-                    tempPoints.push_back(make_pair(x,y));
-
-                    while(!tempPoints.empty()) {
-                        pair<int,int> tempPoint;
-                        tempPoint = tempPoints.front();
-                        tempPoints.pop_front();
-
-                        int x = tempPoint.first;
-                        int y = tempPoint.second;
-
-                        if (((pixels[x])[y]).second) continue;
-                        ((pixels[x])[y]).second = true;
-
-
-                        checkPixel(x+1, y,  tempPoints);
-                        checkPixel(x-1, y,  tempPoints);
-                        checkPixel(x, y+1,  tempPoints);
-                        checkPixel(x, y-1,  tempPoints);
-                    }
-                }
-            }
-        }
-
-        return nunberOfSilhouettes;
-    }
-
+    
     /**
-     * @brief checkPixel  - check if not out of range,
-     *                      the pixel is black
-     *                      and the pixel is not checked
-     * @param x   / pixel's position
-     * @param y  /
-     * @param tempPoints - deque for storage untested pixels
+     * @brief doubleToString convert double to string
+     * @param doub
+     * @return
      */
-    void checkPixel(int x, int y,  deque<pair<int,int>> & tempPoints){
-        if (x < pixels.size()) {
-            if (!((pixels.at(x)).at(y)).second)
-                if (((pixels.at(x)).at(y)).first)
-                    tempPoints.push_back(make_pair(x,y));
+    string doubleToString(double doub){
+        ostringstream strs;
+        strs << doub;
+        string str = strs.str();
+        return str;
+        
+    }
+    /**
+     * @brief getFunctionParamNumber - function returns the number of operands
+     *                                 required for the operation
+     * @param token - operation
+     * @return int value
+     */
+    int getFunctionParamNumber(string token){
+        if ((token == "cos") || (token == "sin")) {
+            return 1;
+        } else if(token == "*" ||
+                  token == "/" ||
+                  token == "+" ||
+                  token == "-" ||
+                  token == "^" ){
+            return 2;
+        } else{
+            return 0;
         }
     }
-
-    ~ShilhouetteRecognizer() {
-        delete img;
+    
+    /**
+     * @brief calculateInputFunction - using inverse Polish notation,
+     *                                 this function is operation calculates
+     *                                 the required number of operands,
+     *                                 perform actions on the data obtained,
+     *                                 deletes them and adds the result in the removal of seat
+     */
+    string calculateInputFunction(){
+        for (int i = 0; i < polishNotation->size(); i++) {
+            string token = polishNotation->at(i);
+            
+            
+            if (getFunctionParamNumber(token) == 2) {
+                double firstArg = stringToDouble(polishNotation->at(i-1));
+                double secondArg = stringToDouble(polishNotation->at(i-2));
+                double rezult;
+                if (token == "+") {
+                    rezult = firstArg + secondArg;
+                } else if(token == "-") {
+                    rezult = secondArg - firstArg;
+                } else if(token == "/"){
+                    rezult = secondArg / firstArg;
+                } else if(token == "*"){
+                    rezult = firstArg * secondArg;
+                } else if (token == "^"){
+                    rezult = pow(secondArg, firstArg);
+                }
+                
+                cout << endl << "Intermediate action: " << secondArg << token << firstArg << " = " << rezult;
+                
+                polishNotation->erase(i);
+                polishNotation->erase(i-2);
+                polishNotation->erase(i-2);
+                polishNotation->insert(i-2, doubleToString(rezult));
+                i -= 2;
+            } else if(getFunctionParamNumber(token) == 1){
+                double firstArg = stringToDouble(polishNotation->at(i-1));
+                double rezult;
+                if(token == "cos"){
+                    rezult = cos(firstArg);
+                } else if(token == "sin"){
+                    rezult = sin(firstArg);
+                }
+                polishNotation->erase(i);
+                polishNotation->erase(i-1);
+                polishNotation->insert(i-1, doubleToString(rezult));
+                i--;
+                
+                cout << endl << "Intermediate action: " << token << firstArg<< " = " << rezult;
+            }
+        }
+        return (*polishNotation)[0];
     }
-
-
+    
 };
+
+void performCalculationsAndShowRezult(string formula){
+    Calculator calc;
+    calc.getPolishNotationFromString(formula);
+    cout << endl << "Rezult is: "<< calc.calculateInputFunction();
+}
+
 
 
 int main() {
-
-    string file = getLine("Input the file name:");
-    while (!fileExists(file)) {
-        cout <<"Sorrry, but there is no file with the specified name!" << endl << endl;
-        file = getLine("Input the file name:");
-    }
-
-    cout <<  "Opening..." << endl;
-
-
-    ShilhouetteRecognizer *worker = new ShilhouetteRecognizer(file);
-    worker->generageBinPixels();
-    cout<< "Hello! I am ShilhouetteRecognizer! And i found "
-        << worker->searchSilhouettes()
-        << " silhouettes in file "
-        << file
-        << endl;
-
-    delete worker;
+    string check;
+    do{
+        string formula = getLine("You can use next tokens: cos(token), sin(token), token^ token, and other standart operations. \n"
+                                 "Enter the data for calculating, please: ");
+        
+        performCalculationsAndShowRezult(formula);
+        check = getLine("\nOne's more? (y/n)");
+        cout << endl;
+    }while( check == "y" || check == "Y");
+    
     return 0;
 }
-
