@@ -151,15 +151,30 @@ public:
     
     
 };
-
+/**
+ * @brief isImageFile - function checks the file and its extension
+ * @param fileName -
+ * @return
+ */
+bool isImageFile(string fileName){
+    if(fileExists(fileName)){
+        string subStringForCheck = fileName.substr(fileName.size()-3);
+        if(subStringForCheck == "bmp" ||
+                subStringForCheck == "jpg" ||
+                subStringForCheck == "png" ||
+                subStringForCheck == "peg")
+            return true;
+    }
+    return false;
+}
 
 int main() {
     
-    string file = getLine("Input the file name:");
-    while (!fileExists(file)) {
-        cout <<"Sorrry, but there is no file with the specified name!" << endl << endl;
+    string file;
+    do{
         file = getLine("Input the file name:");
-    }
+    }while (!isImageFile(file));
+    
     
     cout <<  "Searching ..." << endl;
     
