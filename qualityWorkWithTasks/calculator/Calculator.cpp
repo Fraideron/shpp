@@ -9,8 +9,9 @@
 using namespace std;
 
 /**
- * @brief The Calculator class  using an
- *        algorithm sorting station has introduced expression
+ * @brief The Calculator class using
+ *        an algorithm sorting station
+ *        and performs calculations input string
  */
 class Calculator
 {
@@ -19,23 +20,21 @@ private:
     Stack<string> * tempStack ;
     VEC::vector<string> * polishNotation;
 public:
-    Calculator(string function) {
-        inputString = function;
-        tempStack = new Stack<string>;
-        polishNotation = new VEC::vector<string>;
+    Calculator() {
+        this->tempStack = new Stack<string>;
+        this->polishNotation = new VEC::vector<string>;
     }
-
+    
     ~Calculator() {
         delete tempStack;
         delete polishNotation;
+        inputString = " ";
     }
-
-
-
-
-
+    
+    
+    
     /**
-     * @brief getTokenType - function returns the value of int to separate tokens
+     * @brief getTokenType - function returns the value of int for separate tokens
      * @param token
      * @return type of token
      */
@@ -51,8 +50,8 @@ public:
         }
         return -1;
     }
-
-
+    
+    
     /**
      * @brief getOneTokenFromInputString - function returns a token starting with position 'i'
      * @param position - position of token start
@@ -61,23 +60,22 @@ public:
      */
     string getOneTokenFromInputString(int& position, string & functionString){
         string outputString;
-
+        
         char current = functionString[position];
         char next = functionString[position+1];
-
+        
         while ((getTokenType(current) == getTokenType(next)) && position < functionString.size()) {
-
             outputString += current;
             position++;
             current = next;
             next = functionString[position+1];
         }
-
+        
         outputString += current;
         ++position;
         return outputString;
     }
-
+    
     /**
      * @brief getTokenPriority - priority function returns each input token
      * @param token - token to check
@@ -87,28 +85,29 @@ public:
         if(token == '+' || token == '-' ){
             return 1;
         }else if(token == '*' || token == '/'){
-            return 3;
+            return 2;
         }else if(token == '^'){
-            return 4;
+            return 3;
         }else if(token == '(' || token == ')'){
             return 0;
         } else {
-            return 3;
+            return 4;
         }
     }
-
-
-
+    
+    
+    
     /**
      * @brief getPolishNotationFromString - using a standard algorithm,
      *                                      we obtain the inverse Polish notation
      *                                      from the input line
      */
-    void getPolishNotationFromString(){
+    void getPolishNotationFromString(string function){
+        inputString = function;
         for (int i = 0; i < inputString.size(); ) {
             string token = getOneTokenFromInputString(i, inputString);
             int tokenPriority = getTokenPriority(token[0]);
-
+            
             if(isdigit(token[0]))  {
                 polishNotation->push_back(token);
             } else if (token == "(") {
@@ -124,7 +123,7 @@ public:
                     tempStack->push(token);
                     continue;
                 }
-
+                
                 while((!tempStack->empty()) && tokenPriority < getTokenPriority(tempStack->top()[0]) ){
                     polishNotation->push_back(tempStack->top());
                     tempStack->pop();
@@ -132,12 +131,12 @@ public:
                 tempStack->push(token);
             }
         }
-
+        
         while (!tempStack->empty()) {
             polishNotation->push_back(tempStack->top());
             tempStack->pop();
         }
-
+        
     }
     /**
      * @brief stringToDouble convert  string to double
@@ -150,7 +149,7 @@ public:
         ss >> convertedValue;
         return convertedValue;
     }
-
+    
     /**
      * @brief doubleToString convert double to string
      * @param doub
@@ -161,7 +160,7 @@ public:
         strs << doub;
         string str = strs.str();
         return str;
-
+        
     }
     /**
      * @brief getFunctionParamNumber - function returns the number of operands
@@ -182,7 +181,7 @@ public:
             return 0;
         }
     }
-
+    
     /**
      * @brief calculateInputFunction - using inverse Polish notation,
      *                                 this function is operation calculates
@@ -190,11 +189,11 @@ public:
      *                                 perform actions on the data obtained,
      *                                 deletes them and adds the result in the removal of seat
      */
-    void calculateInputFunction(){
+    string calculateInputFunction(){
         for (int i = 0; i < polishNotation->size(); i++) {
             string token = polishNotation->at(i);
-
-
+            
+            
             if (getFunctionParamNumber(token) == 2) {
                 double firstArg = stringToDouble(polishNotation->at(i-1));
                 double secondArg = stringToDouble(polishNotation->at(i-2));
@@ -210,9 +209,9 @@ public:
                 } else if (token == "^"){
                     rezult = pow(secondArg, firstArg);
                 }
-
-                cout << endl << "diya: " << secondArg<< token << firstArg<< " = " << rezult;
-
+                
+                cout << endl << "Intermediate action: " << secondArg << token << firstArg << " = " << rezult;
+                
                 polishNotation->erase(i);
                 polishNotation->erase(i-2);
                 polishNotation->erase(i-2);
@@ -230,37 +229,30 @@ public:
                 polishNotation->erase(i-1);
                 polishNotation->insert(i-1, doubleToString(rezult));
                 i--;
-
-                cout << endl << "diya: " << token << firstArg<< " = " << rezult;
-
+                
+                cout << endl << "Intermediate action: " << token << firstArg<< " = " << rezult;
             }
-
         }
-        cout << endl <<"Rezult: " << (*polishNotation)[0];
+        return (*polishNotation)[0];
     }
-
+    
 };
 
-void performCalculations(string formula){
-    Calculator *calc = new Calculator(formula);
-    calc->getPolishNotationFromString();
-    calc->calculateInputFunction();
-    delete calc;
+void performCalculationsAndShowRezult(string formula){
+    Calculator calc;
+    calc.getPolishNotationFromString(formula);
+    cout << endl << "Rezult is: "<< calc.calculateInputFunction();
 }
 
 
-    int main() {
 
-        string formula = getLine("You can use next tokens: cos(token), sin(token), token^ token, and other standart operations. \nEnter the data for calculating, please: ");
-        cout << ""<< formula;
-        performCalculations(formula);
-        string check = getLine("\nOne's more? (y/n)");
-        while(check == "y"){
-            formula = getLine("\nEnter the data for calculating, please: ");
-            cout << endl << formula <<  " = ";
-            performCalculations(formula);
-            check = getLine("\nOne's more? (y/n)");
-        }
-
-        return 0;
-    }
+int main() {
+    string check;
+    do{
+        string formula = getLine("You can use next tokens: cos(token), sin(token), token^token, and other standart operations. \n"
+                                 "Enter the data for calculating, please: ");
+        performCalculationsAndShowRezult(formula);
+        check = getLine("\nOne's more? (y/n)");
+    }while( check == "y" || check == "Y");
+    return 0;
+}
