@@ -55,16 +55,16 @@ private:
     vector<vector<Pixel>> pixels ;
     
 public:
-    SilhouetteRecognizer(string file): img(new GBufferedImage()) {
-        img->load(file);
+    SilhouetteRecognizer(): img(new GBufferedImage()) {
+        
     }
     
     /**
-     * @brief isBlack - return true if the pixel is black
+     * @brief ifBlack - return true if the pixel is black
      * @param color
      * @return
      */
-    bool isBlack(int color) {
+    bool ifBlack(int color) {
         if(img->getRed(color) > 120 || img->getGreen(color) > 120 || img->getBlue(color) > 120 )
             return false;
         return true;
@@ -76,11 +76,12 @@ public:
      *                              2) color set to white pixels - 0,
      *                                              black poxels - 1.
      */
-    void generagePixelsTable() {
+    void loadFileAndGeneragePixelsTable(string file) {
+        img->load(file);
         for (int y = 0; y < img->getHeight(); ++y) {
             vector<Pixel> pixelsLine;
             for (int x = 0; x < img->getWidth(); ++x) {
-                pixelsLine.push_back(Pixel(x, y, isBlack(img->getRGB(x,y)), false));
+                pixelsLine.push_back(Pixel(x, y, ifBlack(img->getRGB(x,y)), false));
             }
             pixels.push_back(pixelsLine);
         }
@@ -177,16 +178,16 @@ int main() {
     
     cout <<  "Searching ..." << endl;
     
-    SilhouetteRecognizer *worker = new SilhouetteRecognizer(file);
-    worker->generagePixelsTable();
-    cout<< "Hello! I am SilhouetteRecognizer! And i found "
-        << worker->searchSilhouettes()
+    SilhouetteRecognizer worker;
+    worker.loadFileAndGeneragePixelsTable(file);
+    
+    cout<< "Found " 
+        << worker.searchSilhouettes()
         << " silhouettes in file "
         << file
         << "!"
         << endl;
     
-    delete worker;
     return 0;
 }
 
