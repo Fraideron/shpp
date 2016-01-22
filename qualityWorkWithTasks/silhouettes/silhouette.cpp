@@ -16,14 +16,14 @@ using namespace std;
 class Pixel{
 private:
     int x, y;
-    bool color, check;
+    bool black, check;
 public:
     Pixel(){}
     
-    Pixel(int posX, int posY, bool color, bool check) {
+    Pixel(int posX, int posY, bool black, bool check) {
         this->x = posX;
         this->y = posY;
-        this->color = color;
+        this->black = black;
         this->check = check;
     }
     
@@ -35,11 +35,11 @@ public:
         return this->y;
     }
     
-    bool getColor(){
-        return this->color;
+    bool isBlack(){
+        return this->black;
     }
     
-    bool getCheck(){
+    bool isCheck(){
         return this->check;
     }
     
@@ -60,14 +60,14 @@ public:
     }
     
     /**
-     * @brief ifBlack - return true if the pixel is black
+     * @brief isBlack - return true if the pixel is black
      * @param color
      * @return
      */
-    bool ifBlack(int color) {
-        if(img->getRed(color) > 120 || img->getGreen(color) > 120 || img->getBlue(color) > 120 )
-            return false;
-        return true;
+    bool isBlack(int color) {
+        return !(img->getRed(color) > 120 ||
+                 img->getGreen(color) > 120 ||
+                 img->getBlue(color) > 120 );
     }
     
     /**
@@ -81,7 +81,7 @@ public:
         for (int y = 0; y < img->getHeight(); ++y) {
             vector<Pixel> pixelsLine;
             for (int x = 0; x < img->getWidth(); ++x) {
-                pixelsLine.push_back(Pixel(x, y, ifBlack(img->getRGB(x,y)), false));
+                pixelsLine.push_back(Pixel(x, y, isBlack(img->getRGB(x,y)), false));
             }
             pixels.push_back(pixelsLine);
         }
@@ -103,7 +103,7 @@ public:
             int yLim = pixels[x].size();
             
             for (int y = 0; y < yLim; ++y) {
-                if(!((pixels[x])[y]).getCheck() && ((pixels[x])[y]).getColor()){
+                if(!((pixels[x])[y]).isCheck() && ((pixels[x])[y]).isBlack()){
                     numberOfSilhouettes++;
                     deque<pair<int,int>> pointsForCheck;
                     pointsForCheck.push_back(make_pair(x,y));
@@ -116,7 +116,7 @@ public:
                         int x = tempPoint.first;
                         int y = tempPoint.second;
                         
-                        if (((pixels[x])[y]).getCheck()) continue;
+                        if (((pixels[x])[y]).isCheck()) continue;
                         ((pixels[x])[y]).setCheck(true);
                         
                         checkPixel(x+1, y,  pointsForCheck);
@@ -139,11 +139,11 @@ public:
      * @param tempPoints - deque for storage untested pixels
      */
     void checkPixel(int x, int y,  deque<pair<int,int>> & tempPoints){
-        if (x < pixels.size()) {
-            if (!((pixels[x])[y]).getCheck())
-                if (((pixels[x])[y]).getColor())
-                    tempPoints.push_back(make_pair(x,y));
-        }
+        if ((x < pixels.size()) &&
+                (!((pixels[x])[y]).isCheck()) &&
+                ((pixels[x])[y]).isBlack())
+            tempPoints.push_back(make_pair(x,y));
+        
     }
     
     ~SilhouetteRecognizer() {
@@ -160,11 +160,11 @@ public:
 bool isImageFile(string fileName){
     if(fileExists(fileName)){
         string subStringForCheck = fileName.substr(fileName.size()-3);
-        if(subStringForCheck == "bmp" ||
+        
+        return (subStringForCheck == "bmp" ||
                 subStringForCheck == "jpg" ||
                 subStringForCheck == "png" ||
-                subStringForCheck == "peg")
-            return true;
+                subStringForCheck == "peg");
     }
     return false;
 }
@@ -181,7 +181,7 @@ int main() {
     SilhouetteRecognizer worker;
     worker.loadFileAndGeneragePixelsTable(file);
     
-    cout<< "Found " 
+    cout<< "Found "
         << worker.searchSilhouettes()
         << " silhouettes in file "
         << file
