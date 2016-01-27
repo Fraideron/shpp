@@ -3,11 +3,9 @@
 
 
 #include <vector>
-using namespace std;
-
 #define DEQUE_CHUNK_SIZE 8
-using namespace std;
 
+using namespace std;
 template <typename T>
 class MyDeque{
     
@@ -94,7 +92,8 @@ public:
     }
     
     void pop_back(){
-        if(bottomIndex == DEQUE_CHUNK_SIZE -1 && topChunk->next != -1) deleteBottChunk();
+        if(bottomIndex == DEQUE_CHUNK_SIZE -1 &&
+                topChunk->next != -1) deleteBottChunk();
         bottomIndex++;
     }
     
@@ -123,13 +122,13 @@ public:
         return counter;
     }
     
-    T front(){
-        if(!empty()) return topChunk->dataArray[topIndex-1];
+   T front(){
+        return !empty() ? topChunk->chunk[topIndex-1] : false;
     }
-    
-    
+
+
     T back(){
-        if(!empty()) return bottomChunk->dataArray[bottomIndex+1];
+       return !empty() ? bottomChunk->chunk[bottomIndex+1] : false;
     }
     
     
