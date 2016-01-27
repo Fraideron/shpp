@@ -66,9 +66,7 @@ public:
     
     void push_front(T value){
         if(topIndex == DEQUE_CHUNK_SIZE) allocTopChunk();
-        
         topChunk->dataArray[topIndex++] = value;
-        
         counter++;
     }
     
@@ -86,9 +84,6 @@ public:
         topIndex-- ;
     }
     
-    
-    
-    
     void deleteBottChunk(){
         chunkStorage *temp = &connector[bottomChunk->next];
         delete bottomChunk;
@@ -96,7 +91,6 @@ public:
         bottomChunk->prev = -1;
         bottomIndex = 0;
     }
-    
     
     void pop_back(){
         if(bottomIndex == DEQUE_CHUNK_SIZE -1 && topChunk->next != -1) deleteBottChunk();
@@ -117,7 +111,6 @@ public:
             allocBottChunk();
         }
         bottomChunk->dataArray[bottomIndex--] = value;
-        
         counter++;
     }
     
@@ -136,6 +129,32 @@ public:
     
     T back(){
         if(!empty()) return bottomChunk->dataArray[bottomIndex+1];
+    }
+    
+    
+    //only for debuging
+    void showFront(){
+        topIndex--;
+        while (topChunk->prev != 0){
+            cout << topChunk->chunk[topIndex--] << " ";
+            if(topIndex == -1){
+                cout << "prev" << topChunk->prev<< endl;
+                topChunk = &connector[topChunk->prev];
+                topIndex = DEQUE_CHUNK_SIZE-1;
+            }
+        }
+    }
+    //only for debuging
+    void showBottom(){
+        bottomIndex++;
+        while (bottomChunk->next != 1){
+            cout << bottomChunk->chunk[bottomIndex++] << " ";
+            if(bottomIndex == DEQUE_CHUNK_SIZE){
+                bottomChunk = &connector[bottomChunk->next ];
+                bottomIndex = 1;
+                cout << endl;
+            }
+        }
     }
     
 };
