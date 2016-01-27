@@ -72,6 +72,7 @@ public:
     
     void deleteTopChunk(){
         chunkStorage* temp = &connector[topChunk->prev];
+        delete topChunk;
         topChunk = temp;
         topChunk->next = -1;
         topIndex = DEQUE_CHUNK_SIZE ;
