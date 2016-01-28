@@ -164,9 +164,9 @@ private:
     }
 
 
-public:
-
     Node<T> *root;
+
+public:
 
     BST() : root(0) {
 
