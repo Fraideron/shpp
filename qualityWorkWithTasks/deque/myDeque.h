@@ -1,7 +1,6 @@
 #ifndef MYDEQ
 #define MYDEQ
 
-
 #include <vector>
 #define DEQUE_CHUNK_SIZE 8
 
